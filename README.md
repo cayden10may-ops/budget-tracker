@@ -1,5 +1,6 @@
 # Budget Tracker
-
+**Live demo:** https://budget-tracker-pied-two.vercel.app/
+> Hosted on free tiers, so the first load may take up to a minute while the server wakes up.
 A full-stack expense tracking app built to practice CRUD operations, REST APIs, and database integration.
 
 ## Features
