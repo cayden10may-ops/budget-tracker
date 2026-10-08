@@ -35,9 +35,6 @@ app.post('/api/expenses', async (req, res) => {
   res.status(201).json(data[0]);
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-// DELETE an expense
 app.delete('/api/expenses/:id', async (req, res) => {
   const { id } = req.params;
 
@@ -49,3 +46,6 @@ app.delete('/api/expenses/:id', async (req, res) => {
   if (error) return res.status(500).json({ error: error.message });
   res.status(204).send();
 });
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
