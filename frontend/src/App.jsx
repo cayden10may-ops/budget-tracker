@@ -1,17 +1,42 @@
 import { useState, useEffect } from 'react';
+import { supabase } from './supabaseClient';
+import Auth from './Auth';
+
 const API_URL = import.meta.env.VITE_API_URL;
+
 function App() {
+  const [session, setSession] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [expenses, setExpenses] = useState([]);
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('');
   const [note, setNote] = useState('');
 
   useEffect(() => {
-    fetchExpenses();
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session);
+      setLoading(false);
+    });
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      setSession(newSession);
+    });
+
+    return () => listener.subscription.unsubscribe();
   }, []);
 
+  useEffect(() => {
+    if (session) fetchExpenses();
+  }, [session]);
+
+  const authHeaders = () => ({
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${session.access_token}`,
+  });
+
   const fetchExpenses = async () => {
-    const res = await fetch('http://localhost:5000/api/expenses');
+    const res = await fetch(`${API_URL}/api/expenses`, { headers: authHeaders() });
+    if (!res.ok) return;
     const data = await res.json();
     setExpenses(data);
   };
@@ -19,9 +44,9 @@ function App() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    await fetch('http://localhost:5000/api/expenses', {
+    await fetch(`${API_URL}/api/expenses`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: authHeaders(),
       body: JSON.stringify({ amount: parseFloat(amount), category, note }),
     });
 
@@ -32,15 +57,23 @@ function App() {
   };
 
   const handleDelete = async (id) => {
-    await fetch(`http://localhost:5000/api/expenses/${id}`, {
+    await fetch(`${API_URL}/api/expenses/${id}`, {
       method: 'DELETE',
+      headers: authHeaders(),
     });
     fetchExpenses();
   };
 
+  if (loading) return <p>Loading...</p>;
+  if (!session) return <Auth />;
+
   return (
     <div style={{ maxWidth: '500px', margin: '40px auto', fontFamily: 'sans-serif' }}>
-      <h1>Budget Tracker</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h1>Budget Tracker</h1>
+        <button onClick={() => supabase.auth.signOut()}>Log out</button>
+      </div>
+      <p style={{ color: '#666' }}>Logged in as {session.user.email}</p>
 
       <form onSubmit={handleSubmit} style={{ marginBottom: '30px' }}>
         <input
