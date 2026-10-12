@@ -1,5 +1,5 @@
 # Budget Tracker
-
+![CI](https://github.com/cayden10may-ops/budget-tracker/actions/workflows/ci.yml/badge.svg)
 A full-stack expense tracker with user accounts, built to practise REST APIs, authentication and database security.
 
 **Live demo:** https://budget-tracker-pied-two.vercel.app
