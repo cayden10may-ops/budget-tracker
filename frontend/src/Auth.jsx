@@ -19,40 +19,44 @@ export default function Auth() {
   };
 
   return (
-    <div style={{ maxWidth: '400px', margin: '80px auto', fontFamily: 'sans-serif' }}>
-      <h1>Budget Tracker</h1>
-      <h2>{isSignUp ? 'Create account' : 'Log in'}</h2>
-
-      <form onSubmit={handleSubmit}>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          style={{ display: 'block', marginBottom: '10px', width: '100%', padding: '8px' }}
-        />
-        <input
-          type="password"
-          placeholder="Password (min 6 characters)"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          style={{ display: 'block', marginBottom: '10px', width: '100%', padding: '8px' }}
-        />
-        <button type="submit" style={{ padding: '10px 20px' }}>
-          {isSignUp ? 'Sign up' : 'Log in'}
-        </button>
-      </form>
-
-      {message && <p style={{ color: 'red' }}>{message}</p>}
-
-      <p>
-        {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
-        <button onClick={() => setIsSignUp(!isSignUp)}>
-          {isSignUp ? 'Log in' : 'Sign up'}
-        </button>
+    <div className="container" style={{ maxWidth: '400px', paddingTop: '80px' }}>
+      <h1 style={{ textAlign: 'center' }}>Budget Tracker</h1>
+      <p className="subtle" style={{ textAlign: 'center' }}>
+        Track your spending, simply.
       </p>
+
+      <div className="card">
+        <h2 style={{ marginTop: 0 }}>{isSignUp ? 'Create account' : 'Log in'}</h2>
+
+        <form onSubmit={handleSubmit}>
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <input
+            type="password"
+            placeholder="Password (min 6 characters)"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <button type="submit" className="full">
+            {isSignUp ? 'Sign up' : 'Log in'}
+          </button>
+        </form>
+
+        {message && <div className="error" style={{ marginTop: '12px' }}>{message}</div>}
+
+        <p className="subtle" style={{ marginTop: '16px', marginBottom: 0 }}>
+          {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
+          <button className="link" onClick={() => setIsSignUp(!isSignUp)}>
+            {isSignUp ? 'Log in' : 'Sign up'}
+          </button>
+        </p>
+      </div>
     </div>
   );
 }
