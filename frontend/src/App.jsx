@@ -17,6 +17,12 @@ function App() {
   const [category, setCategory] = useState('');
   const [note, setNote] = useState('');
 
+  // Editing state
+  const [editingId, setEditingId] = useState(null);
+  const [editAmount, setEditAmount] = useState('');
+  const [editCategory, setEditCategory] = useState('');
+  const [editNote, setEditNote] = useState('');
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
@@ -66,6 +72,35 @@ function App() {
       setAmount('');
       setCategory('');
       setNote('');
+      fetchExpenses();
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const startEdit = (exp) => {
+    setEditingId(exp.id);
+    setEditAmount(String(exp.amount));
+    setEditCategory(exp.category);
+    setEditNote(exp.note || '');
+  };
+
+  const cancelEdit = () => setEditingId(null);
+
+  const handleSave = async (id) => {
+    setError('');
+    try {
+      const res = await fetch(`${API_URL}/api/expenses/${id}`, {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify({
+          amount: parseFloat(editAmount),
+          category: editCategory,
+          note: editNote,
+        }),
+      });
+      if (!res.ok) throw new Error('Could not save changes');
+      setEditingId(null);
       fetchExpenses();
     } catch (err) {
       setError(err.message);
@@ -141,23 +176,50 @@ function App() {
         {!loadingExpenses && expenses.length === 0 && (
           <p className="empty">No expenses yet. Add your first one above.</p>
         )}
-        {expenses.map((exp) => (
-          <div key={exp.id} className="expense">
-            <div>
-              <div>
-                <span className="badge">{exp.category}</span>
-                <span className="expense-amount">{formatRand(exp.amount)}</span>
-              </div>
-              <div className="expense-meta">
-                {exp.note ? `${exp.note} · ` : ''}
-                {new Date(exp.created_at).toLocaleDateString()}
+        {expenses.map((exp) =>
+          editingId === exp.id ? (
+            <div key={exp.id} className="expense" style={{ display: 'block' }}>
+              <input
+                type="number"
+                step="0.01"
+                value={editAmount}
+                onChange={(e) => setEditAmount(e.target.value)}
+              />
+              <input
+                type="text"
+                value={editCategory}
+                onChange={(e) => setEditCategory(e.target.value)}
+              />
+              <input
+                type="text"
+                placeholder="Note (optional)"
+                value={editNote}
+                onChange={(e) => setEditNote(e.target.value)}
+              />
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button onClick={() => handleSave(exp.id)}>Save</button>
+                <button className="secondary" onClick={cancelEdit}>Cancel</button>
               </div>
             </div>
-            <button className="danger" onClick={() => handleDelete(exp.id)}>
-              Delete
-            </button>
-          </div>
-        ))}
+          ) : (
+            <div key={exp.id} className="expense">
+              <div>
+                <div>
+                  <span className="badge">{exp.category}</span>
+                  <span className="expense-amount">{formatRand(exp.amount)}</span>
+                </div>
+                <div className="expense-meta">
+                  {exp.note ? `${exp.note} · ` : ''}
+                  {new Date(exp.created_at).toLocaleDateString()}
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button className="secondary" onClick={() => startEdit(exp)}>Edit</button>
+                <button className="danger" onClick={() => handleDelete(exp.id)}>Delete</button>
+              </div>
+            </div>
+          )
+        )}
       </div>
     </div>
   );

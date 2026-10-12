@@ -49,6 +49,24 @@ app.post('/api/expenses', requireAuth, async (req, res) => {
   res.status(201).json(data[0]);
 });
 
+app.put('/api/expenses/:id', requireAuth, async (req, res) => {
+  const supabase = clientForUser(req);
+  const { id } = req.params;
+  const { amount, category, note } = req.body;
+
+  const { data, error } = await supabase
+    .from('expenses')
+    .update({ amount, category, note })
+    .eq('id', id)
+    .select();
+
+  if (error) return res.status(500).json({ error: error.message });
+  if (!data || data.length === 0) {
+    return res.status(404).json({ error: 'Expense not found' });
+  }
+  res.json(data[0]);
+});
+
 app.delete('/api/expenses/:id', requireAuth, async (req, res) => {
   const supabase = clientForUser(req);
   const { id } = req.params;
